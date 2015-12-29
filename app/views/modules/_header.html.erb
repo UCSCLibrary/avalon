@@ -17,16 +17,22 @@ Unless required by applicable law or agreed to in writing, software distributed
     <div class="row">
       <div class="row-fluid whitespace-half">
       <header>
-        <div class="col-sm-2 logo">
+        <div class="col-sm-3 logo">
         <%= link_to root_path do %>
-          <%= image_tag "Home.png", alt: "Avalon Media System - #{t(:release_label)} #{Avalon::VERSION}" %>
+	<%= image_tag "ucsc-logotype.svg", alt: "University of California Santa Cruz" %>
         <% end %>
         </div>
-        
-        <!-- <div class="col-md-6">
-          <h1>Avalon Media System</h1>
-          <p class="lead"><%=release_text%></p>
-        </div>    -->
+
+	<h1 class="title-standard" id="site-name">
+          <a href="http://library.ucsc.edu" title="Back to homepage">University<br>Library</a>
+        </h1>
+
+	<div id="site-title">
+        <%= link_to root_path do %>
+	Streaming Media
+	<% end %>
+	</div>
+
 
         <%# By default shift log in / log out to the header %>
         <div class="pull-right log-in-out">

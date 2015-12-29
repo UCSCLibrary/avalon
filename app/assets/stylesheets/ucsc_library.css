@@ -1,0 +1,72 @@
+body {
+    background-color: #f5f4eb;
+    padding:3%;
+}
+
+.col-sm-3 {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    width: 25%;
+}
+
+div.custom-header {
+    background-color: transparent;
+}
+
+h1#site-name {
+    position:absolute;
+    bottom:0px;
+    left:27%;
+}
+
+#site-name a {
+    display: block;
+    color: #f1b521;
+    font-size: 26px;
+    font-weight: normal;
+    letter-spacing: -1px;
+    line-height: 32px;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    text-rendering: optimizelegibility;
+    text-transform: uppercase;
+}
+
+#site-title {
+    position:absolute;
+    bottom: 0px;
+    left:38%;
+}
+
+#site-title a {
+    color: #f1b521;
+    font-size: 48px;
+    font-weight: normal;
+    letter-spacing: -1px;
+    line-height: 32px;
+    margin: 0;
+    padding: 0 0 0 30px;
+    text-decoration: none;
+    text-rendering: optimizelegibility;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+header {
+    position:relative;
+    height:115px;
+    width:100%;
+}
+
+
+.pull-right.log-in-out {
+    top: 0;
+    position: absolute;
+    right: 0;
+}
+
+#header-navbar .navbar-brand {
+    height: 45px;
+}

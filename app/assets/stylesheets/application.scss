@@ -19,7 +19,7 @@
 @import "bootstrap-sprockets";
 @import "browse_everything";
 @import "bootstrap";
-@import "blacklight_themes/avalon";
+@import "blacklight_themes/ucsc_library";
 @import "blacklight/blacklight";
 @import "about_page";
 @import "typeahead";
@@ -50,3 +50,4 @@
 */
 //= require rails_bootstrap_forms
 @import "avalon";
+

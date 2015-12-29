@@ -14,6 +14,8 @@
  * ---  END LICENSE_HEADER BLOCK  ---
  */
 
+@import "ucsc_library";
+
 @import "branding";
 @import "bootstrap/variables";
 //@import "bootstrap-responsive";
@@ -110,7 +112,7 @@ tr.active-false td {
  */
 #header-navbar .navbar-brand {
   @extend .desktop-hidden;
-  height: 35px;
+  height: 45px;
 }
 
 .navbar {
