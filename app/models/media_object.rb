@@ -88,6 +88,30 @@ class MediaObject < ActiveFedora::Base
     end
   end
 
+
+#!!!---
+# BEGIN PART ADDED BY NED
+#!!!---
+
+  def archive_in_merritt(profile)
+    require 'open-uri'
+    require 'tmpdir'
+    require 'uri'
+
+    @merrittaccount = YAML.load_file(Rails.root.join('config','merritt.yml'))[Rails.env]
+
+    file = File.open('/tmp/'+Dir::Tmpname.make_tmpname(['merritt-object-manifest-', '.checkm'], nil),'w')
+    fhandle = open('http://localhost'+manifest_media_object_path(self.pid)+"?host="+URI.encode(request.protocol+request.host_with_port))
+    #check above for proper pid reference
+    file << fhandle.read
+    file.close
+
+    @command = "curl -u #{@merrittaccount['username']}:#{@merrittaccount['password']} -F file=@#{file.path} -F type=object-manifest -F responseForm=json -F profile=#{profile} https://merritt.cdlib.org/object/ingest"
+
+  end
+
+#!END PART ADDED BY NED
+
   # this method returns a hash: class attribute -> metadata attribute
   # this is useful for decoupling the metdata from the view
   def klass_attribute_to_metadata_attribute_map

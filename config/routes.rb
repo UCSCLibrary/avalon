@@ -40,6 +40,8 @@ Avalon::Application.routes.draw do
       get 'section/:content', :action => :show, :as => :pid_section
       get 'tree', :action => :tree, :as => :tree
       get :confirm_remove
+      get 'archive',:action => :archive
+      get 'manifest',:action => :manifest
     end
     collection do
       get :confirm_remove

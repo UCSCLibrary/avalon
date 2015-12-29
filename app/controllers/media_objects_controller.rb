@@ -58,8 +58,68 @@ class MediaObjectsController < ApplicationController
     @mediaobject.collection = collection
     @mediaobject.save(:validate => false)
 
+    # !!!-----
+    # BEGIN PART ADDED BY NED
+    # !!!-----
+
+    if params[:merritt]
+      @mediaobject.archive_in_merritt();
+    end
+    # !!!-----
+    # END PART ADDED BY NED
+    # !!!-----
+
     redirect_to edit_media_object_path(@mediaobject)
   end
+
+
+  # !!!-----
+  # BEGIN PART ADDED BY NED
+  # !!!-----
+
+  def archive
+
+    @mediaobject = MediaObject.find(params[:id])
+    @mediaobject.archive_in_merritt();
+    flash.notice = 'This item has been exported to Merritt.'
+    redirect_to media_object_path(@mediaobject)
+
+  end
+
+  def manifest
+    require 'cgi'
+    response.headers["Content-Type"] = "text/plain"
+
+    @files=[];
+    @mediaobject = MediaObject.find(params[:id])
+    @mediaobject.parts_with_order.each { |file| 
+#      if file.file_size.to_i > 100000000 then
+      hash = ""
+      hashAlg = ""
+#      else 
+#        hash = Digest::MD5.file file.file_location 
+#        hashAlg = 'md5'
+#      end 
+      @files << {
+        hashAlg: hashAlg,
+        hash: hash,
+        size: file.file_size,
+        filename: file.file_location.lines('/').to_a[-1],
+        url: params['host']+'/direct/'+file.file_location.lines('dropbox/').to_a[1].gsub(" ","%20")
+      }
+    }
+    render :layout =>false
+  end
+  
+  def edit
+    @profiles = YAML.load_file(Rails.root.join('config','merritt.yml'))[Rails.env]['profiles']
+    super
+  end
+
+  # !!!-----
+  #END PART ADDED BY NED
+  # !!!-----
+
 
   def custom_edit
     authorize! :update, @mediaobject
@@ -87,7 +147,20 @@ class MediaObjectsController < ApplicationController
       @addable_groups = Admin::Group.non_system_groups.reject { |g| @groups.include? g.name }
       @addable_courses = Course.all.reject { |c| @virtual_groups.include? c.context_id }
     end
-  end
+  
+    # !!!-----
+    # BEGIN PART ADDED BY NED
+    # !!!-----
+  
+    if params[:merritt]
+      @mediaobject.archive_in_merritt(params[:merritt]);
+    end
+    # !!!-----
+    # END PART ADDED BY NED
+    # !!!-----
+
+end
+
 
   def custom_update
     authorize! :update, @mediaobject
