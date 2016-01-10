@@ -3,6 +3,10 @@ body {
     padding:3%;
 }
 
+#sidebar > form > select {
+    max-width:100%;
+}
+
 .col-sm-3 {
     bottom: 0;
     left: 0;

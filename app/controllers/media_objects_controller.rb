@@ -63,7 +63,7 @@ class MediaObjectsController < ApplicationController
     # !!!-----
 
     if params[:merritt]
-      @mediaobject.archive_in_merritt();
+      @mediaobject.archive_in_merritt(params[:merritt],URI.encode(request.host_with_port));
     end
     # !!!-----
     # END PART ADDED BY NED
@@ -80,7 +80,7 @@ class MediaObjectsController < ApplicationController
   def archive
 
     @mediaobject = MediaObject.find(params[:id])
-    @mediaobject.archive_in_merritt();
+    @mediaobject.archive_in_merritt(params[:profile],URI.encode(request.host_with_port));
     flash.notice = 'This item has been exported to Merritt.'
     redirect_to media_object_path(@mediaobject)
 
@@ -89,7 +89,6 @@ class MediaObjectsController < ApplicationController
   def manifest
     require 'cgi'
     response.headers["Content-Type"] = "text/plain"
-
     @files=[];
     @mediaobject = MediaObject.find(params[:id])
     @mediaobject.parts_with_order.each { |file| 
@@ -106,6 +105,18 @@ class MediaObjectsController < ApplicationController
         size: file.file_size,
         filename: file.file_location.lines('/').to_a[-1],
         url: params['host']+'/direct/'+file.file_location.lines('dropbox/').to_a[1].gsub(" ","%20")
+      }
+      metaUrl = params['host']+'/media_objects/'+params[:id]+'/content/descMetadata'
+      http = Net::HTTP.start(params['host'])
+      response = http.request_head('/media_objects/avalon:102/content/descMetadata')
+      file_size = response['content-length']
+      logger.debug('newresponse3:'+response.to_s)
+      @files << {
+        hashAlg: hashAlg,
+        hash: hash,
+        size: file_size,
+        filename: "DescMetadata.xml",
+        url: metaUrl
       }
     }
     render :layout =>false
@@ -153,7 +164,7 @@ class MediaObjectsController < ApplicationController
     # !!!-----
   
     if params[:merritt]
-      @mediaobject.archive_in_merritt(params[:merritt]);
+      @mediaobject.archive_in_merritt(params[:profile],URI.encode(request.host_with_port));
     end
     # !!!-----
     # END PART ADDED BY NED
@@ -168,6 +179,14 @@ end
   end
 
   def show
+#    msjob = MerrittStatusJob.new(:pid => @mediaobject.pid, :batchID => 'test')
+#    Delayed::Job.enqueue(msjob,:run_at => 2.minutes.from_now)
+    Delayed::Job.enqueue(MerrittStatusJob.new('avalon:102','test'))
+ 
+#      @mediaobject.permalink = "http://google.com"
+#      @mediaobject.save!
+
+#    @mediaobject.merritt_check_status("bid-b060fb79-e204-4e85-b3e3-f99ca06cc3d3")
     authorize! :read, @mediaobject
     respond_to do |format|
       format.html do
