@@ -3,6 +3,10 @@ body {
     padding:3%;
 }
 
+ul.bookmarksTools li form select {
+    max-width:100px
+}
+
 #sidebar > form > select {
     max-width:100%;
 }

@@ -58,40 +58,32 @@ class MediaObjectsController < ApplicationController
     @mediaobject.collection = collection
     @mediaobject.save(:validate => false)
 
-    # !!!-----
-    # BEGIN PART ADDED BY NED
-    # !!!-----
-
-    if params[:merritt]
-      @mediaobject.archive_in_merritt(params[:merritt],URI.encode(request.host_with_port));
-    end
-    # !!!-----
-    # END PART ADDED BY NED
-    # !!!-----
-
     redirect_to edit_media_object_path(@mediaobject)
   end
 
-
-  # !!!-----
-  # BEGIN PART ADDED BY NED
-  # !!!-----
-
   def archive
-
     @mediaobject = MediaObject.find(params[:id])
-    @mediaobject.archive_in_merritt(params[:profile],URI.encode(request.host_with_port));
-    flash.notice = 'This item has been exported to Merritt.'
+    begin
+      @mediaobject.archive_in_merritt(params[:profile]);
+      flash.notice = 'This item has been exported to Merritt.'
+    rescue
+      flash.notice = 'There was an error exporting to Merritt. Please try again later or contact your system administrator.'
+    end
     redirect_to media_object_path(@mediaobject)
-
   end
 
   def manifest
-    require 'cgi'
-    response.headers["Content-Type"] = "text/plain"
     @files=[];
     @mediaobject = MediaObject.find(params[:id])
+    host = YAML.load_file(Rails.root.join('config','avalon.yml'))[Rails.env]['domain']['host']
+    logger.debug('host from yaml:'+host)
     @mediaobject.parts_with_order.each { |file| 
+      if(!file.file_location.include?('dropbox/'))
+        flash.notice = "Merritt export currently only supports files uploaded to the FTP dropbox, not files uploaded through the browser"
+        redirect_to media_object_path(@mediaobject)
+        return
+      end
+
 #      if file.file_size.to_i > 100000000 then
       hash = ""
       hashAlg = ""
@@ -99,18 +91,21 @@ class MediaObjectsController < ApplicationController
 #        hash = Digest::MD5.file file.file_location 
 #        hashAlg = 'md5'
 #      end 
+
       @files << {
         hashAlg: hashAlg,
         hash: hash,
         size: file.file_size,
         filename: file.file_location.lines('/').to_a[-1],
-        url: params['host']+'/direct/'+file.file_location.lines('dropbox/').to_a[1].gsub(" ","%20")
+        url: "#{host}/direct/"+file.file_location.lines('dropbox/').to_a[1].gsub(" ","%20")
       }
-      metaUrl = params['host']+'/media_objects/'+params[:id]+'/content/descMetadata'
-      http = Net::HTTP.start(params['host'])
-      response = http.request_head('/media_objects/avalon:102/content/descMetadata')
-      file_size = response['content-length']
-      logger.debug('newresponse3:'+response.to_s)
+      metaUrl = "#{host}/media_objects/#{params[:id]}/content/descMetadata"
+      response = nil
+      Net::HTTP.start(host, 80) {|http|
+        response = http.get("/media_objects/#{params[:id]}/content/descMetadata")
+      }
+      file_size = response.body.size
+      logger.debug('newresponse3:'+response.inspect)
       @files << {
         hashAlg: hashAlg,
         hash: hash,
@@ -119,6 +114,8 @@ class MediaObjectsController < ApplicationController
         url: metaUrl
       }
     }
+    require 'cgi'
+    response.headers["Content-Type"] = "text/plain"
     render :layout =>false
   end
   
@@ -126,11 +123,6 @@ class MediaObjectsController < ApplicationController
     @profiles = YAML.load_file(Rails.root.join('config','merritt.yml'))[Rails.env]['profiles']
     super
   end
-
-  # !!!-----
-  #END PART ADDED BY NED
-  # !!!-----
-
 
   def custom_edit
     authorize! :update, @mediaobject
@@ -150,7 +142,7 @@ class MediaObjectsController < ApplicationController
     end
 
     if 'access-control' == @active_step 
-      @groups = @mediaobject.local_read_groups
+
       @users = @mediaobject.read_users
       @virtual_groups = @mediaobject.virtual_read_groups
       @visibility = @mediaobject.visibility
@@ -164,7 +156,7 @@ class MediaObjectsController < ApplicationController
     # !!!-----
   
     if params[:merritt]
-      @mediaobject.archive_in_merritt(params[:profile],URI.encode(request.host_with_port));
+      @mediaobject.archive_in_merritt(params[:profile]);
     end
     # !!!-----
     # END PART ADDED BY NED
@@ -179,13 +171,7 @@ end
   end
 
   def show
-#    msjob = MerrittStatusJob.new(:pid => @mediaobject.pid, :batchID => 'test')
-#    Delayed::Job.enqueue(msjob,:run_at => 2.minutes.from_now)
-    Delayed::Job.enqueue(MerrittStatusJob.new('avalon:102','test'))
- 
-#      @mediaobject.permalink = "http://google.com"
-#      @mediaobject.save!
-
+    Delayed::Job.enqueue(MerrittStatusJob.new('avalon:102','bid-1f0beb32-005c-4db1-8a97-9310da3f456c'))
 #    @mediaobject.merritt_check_status("bid-b060fb79-e204-4e85-b3e3-f99ca06cc3d3")
     authorize! :read, @mediaobject
     respond_to do |format|

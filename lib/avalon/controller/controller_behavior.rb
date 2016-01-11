@@ -22,6 +22,7 @@ module Avalon
       def deliver_content
         @obj = ActiveFedora::Base.find(params[:id], :cast => true)
         if can? :inspect, @obj
+        logger.debug('inspection attempt successful from:'+request.remote_ip)
           ds = @obj.datastreams[params[:datastream]]
           if ds.nil? or ds.new?
             render :text => 'Not Found', :status => :not_found
@@ -29,6 +30,7 @@ module Avalon
             render :text => ds.content, :content_type => ds.mimeType
           end
         else
+          logger.debug('inspection attempt unsuccessful from:'+request.remote_ip)
           render :text => 'Unauthorized', :status => :unauthorized
         end
       end

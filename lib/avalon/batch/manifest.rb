@@ -152,6 +152,11 @@ module Avalon
               if FILE_FIELDS.include?(f)
                 content << {} if f == :file
                 content.last[f] = f == :skip_transcoding ? true?(values[i]) : values[i]
+              elsif "merritt_profile"===f
+                merritt_profile = values[i]
+                if !merritt_profile.nil? && merritt_profile.empty?
+                  merritt_profile = nil
+                end
               else
                 fields[f] << values[i] 
               end
@@ -167,7 +172,7 @@ module Avalon
             end
           }
 
-          entries << Entry.new(fields.select { |f| !FILE_FIELDS.include?(f) }, content, opts, index, self)
+          entries << Entry.new(fields.select { |f| !FILE_FIELDS.include?(f) }, content, opts, index, self, merritt_profile)
         end
       end
 

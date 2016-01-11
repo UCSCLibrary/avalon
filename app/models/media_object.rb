@@ -93,33 +93,31 @@ class MediaObject < ActiveFedora::Base
 # BEGIN PART ADDED BY NED
 #!!!---
 
-  def archive_in_merritt(profile,host_url)
+  def archive_in_merritt(profile,host_url=nil)
     require 'open-uri'
     require 'tmpdir'
     require 'uri'
 
     @merrittaccount = YAML.load_file(Rails.root.join('config','merritt.yml'))[Rails.env]
+    host_url = YAML.load_file(Rails.root.join('config','avalon.yml'))[Rails.env]['domain']['host']
 
     file = File.open('/tmp/'+Dir::Tmpname.make_tmpname(['merritt-object-manifest-', '.checkm'], nil),'w')
 
-    logger.debug('failurl:http://localhost/media_objects/'+self.pid+"/manifest?host="+host_url)
-    fhandle = open('http://localhost/media_objects/'+self.pid+"/manifest?host="+host_url)
+    fhandle = open('http://localhost/media_objects/'+self.pid+"/manifest")
     file << fhandle.read
     file.close
 
-    command = "curl -k -u #{@merrittaccount['username']}:#{@merrittaccount['password']} -F file=@#{file.path} -F type=object-manifest -F responseForm=json -F profile=#{profile} -F title=\"#{self.title}\" -F creator=\"#{self.creator[0]}\" -F localIdentifier=\"#{self.pid}\" https://merritt.cdlib.org/object/ingest"
+    command = "curl -u #{@merrittaccount['username']}:#{@merrittaccount['password']} -F file=@#{file.path} -F type=object-manifest -F responseForm=json -F profile=#{profile} -F title=\"#{self.title}\" -F creator=\"#{self.creator[0]}\" -F localIdentifier=\"#{self.pid}\" https://merritt.cdlib.org/object/ingest"
     logger.debug("fffcommand:"+command);
-
-    response = JSON.parse(`#{command}`)
-    logger.debug("fffcommandresponse:"+command);
+    raw_response = `#{command}`
+    begin
+      response = JSON.parse(raw_response)
+    rescue JSON::ParserError => e 
+      return -1
+    end
+    logger.debug("fffcommandresponse:"+response.to_s);
     batchState = response["bat:batchState"]
     batchID = batchState['bat:batchID']
-#    batchStatus = batchState['bat:batchStatus']
-#    jobStates = batchState['bat:jobStates']
-#    jobState = jobStates['bat:jobState']
-#    jobID = jobState['bat:jobID']
-
-#    self.delay(:run_at => 2.minutes.from_now).merritt_check_status(batchID)
     logger.debug('starting status check job:'+self.pid+' batch: '+batchID)
     Delayed::Job.enqueue(MerrittStatusJob.new(self.pid,batchID))
   end
