@@ -26,7 +26,7 @@ class Ability
   include Hydra::Ability
   include Hydra::PolicyAwareAbility
 
-  def initialize(current_user,user_session,client_ip=nil)
+  def initialize(current_user,user_session={},client_ip=nil)
     @client_ip = client_ip
     super(current_user,user_session)
   end

@@ -180,12 +180,12 @@ class BookmarksController < CatalogController
   end
   
   def archive_action documents
-    profile= params[:profile]
     errors = []
     success_ids = []
     Array(documents.map(&:id)).each do |id|
       media_object = MediaObject.find(id)
       if can? :update, media_object
+        media_object.archive_in_merritt(params[:profile])
         success_ids << id
       else
         errors += ["#{media_object.title} (#{id}) #{t('blacklight.messages.permission_denied')}."]
@@ -193,7 +193,6 @@ class BookmarksController < CatalogController
     end
     flash[:success] = "Successfully archived #{success_ids.count} items into Merritt"  if success_ids.count > 0
     flash[:alert] = "Failed to archive #{errors.count} items into Merritt" if errors.count > 0
-    MediaObject.archive_in_merritt(profile)
   end
 
 end

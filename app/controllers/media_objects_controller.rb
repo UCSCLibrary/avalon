@@ -171,8 +171,6 @@ end
   end
 
   def show
-    Delayed::Job.enqueue(MerrittStatusJob.new('avalon:102','bid-1f0beb32-005c-4db1-8a97-9310da3f456c'))
-#    @mediaobject.merritt_check_status("bid-b060fb79-e204-4e85-b3e3-f99ca06cc3d3")
     authorize! :read, @mediaobject
     respond_to do |format|
       format.html do

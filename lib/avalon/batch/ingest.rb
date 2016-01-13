@@ -38,6 +38,7 @@ module Avalon
           begin
             ingest_batch = ingest_package(package)
           rescue Exception => ex
+            logger.debug "mer: exception ingesting package"
             begin
               package.manifest.error!
             ensure
@@ -48,9 +49,12 @@ module Avalon
       end
 
       def ingest_package(package)
+        logger.debug "mer: ingesting package"
         base_errors = []
         current_user = package.user
+        logger.debug "mer: Wait, is this problem about creating new abilities?"
         current_ability = Ability.new(current_user)
+        logger.debug "mer: Not if you can read this!"
         # Validate base package attributes: user, collection, and authorization
         if current_user.nil?
           base_errors << "User does not exist in the system: #{package.manifest.email}."
@@ -65,6 +69,7 @@ module Avalon
           end
         end
         if !base_errors.empty? || !package.valid?
+          logger.debug "mer: error found in ingest.rb"
           package.manifest.error!
           IngestBatchMailer.batch_ingest_validation_error( package, base_errors ).deliver
           return nil

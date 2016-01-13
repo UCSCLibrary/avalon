@@ -59,7 +59,9 @@ module Avalon
       def initialize(file, package)
         @file = file
         @package = package
+        logger.debug "mer: loading"
         load!
+        logger.debug "mer: loaded"
       end
 
       def load!
@@ -74,8 +76,11 @@ module Avalon
           @field_names = header_row.collect { |field| 
             field.to_s.downcase.gsub(/\s/,'_').strip.to_sym 
           }
+          logger.debug "mer: creating entries"
           create_entries!
+          logger.debug "mer: entries created"
         rescue Exception => err
+          logger.debug "mer: error logged while loading manifest"
           error! "Invalid manifest file: #{err.message}"
         end
       end
@@ -85,6 +90,7 @@ module Avalon
       end
 
       def error! msg=nil
+        logger.debug "mer: an error is occurring"
         File.open("#{@file}.error",'a') do |f| 
           if msg.nil?
             entries.each do |entry|
@@ -133,6 +139,7 @@ module Avalon
       end
 
       def create_entries!
+        @merritt_profile = ""
         f = @spreadsheet.first_row + 2
         l = @spreadsheet.last_row
         f.upto(l) do |index|
@@ -152,10 +159,10 @@ module Avalon
               if FILE_FIELDS.include?(f)
                 content << {} if f == :file
                 content.last[f] = f == :skip_transcoding ? true?(values[i]) : values[i]
-              elsif "merritt_profile"===f
-                merritt_profile = values[i]
-                if !merritt_profile.nil? && merritt_profile.empty?
-                  merritt_profile = nil
+              elsif "merritt_profile"==f.to_s
+                @merritt_profile = values[i]
+                if !@merritt_profile.nil? && @merritt_profile.empty?
+                  @merritt_profile = nil
                 end
               else
                 fields[f] << values[i] 
@@ -172,7 +179,7 @@ module Avalon
             end
           }
 
-          entries << Entry.new(fields.select { |f| !FILE_FIELDS.include?(f) }, content, opts, index, self, merritt_profile)
+          entries << Entry.new(fields.select { |f| !FILE_FIELDS.include?(f) }, content, opts, index, self, @merritt_profile)
         end
       end
 

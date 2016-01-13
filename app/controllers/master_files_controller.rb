@@ -173,13 +173,23 @@ class MasterFilesController < ApplicationController
         file_path = URI.parse(entry[:url]).path.gsub(/\+/,' ')
         master_file = MasterFile.new
         master_file.save( validate: false )
+        logger.debug('nnn master file saved')
         master_file.mediaobject = media_object
+        logger.debug('nnn media object set')
+        master_file.save( validate: false )
+        logger.debug('nnn master file saved again')
         master_file.setContent(File.open(file_path, 'rb'))
-        master_file.set_workflow(params[:workflow])
-        
-        unless master_file.save
+        logger.debug('nnn master file content set')
+        master_file.save( validate: false )
+        logger.debug('nnn master file saved after setting content')
+        master_file.set_workflow(params[:workflow])        
+        master_file.save( validate: false )
+        logger.debug('nnn master file saved after setting workflow')
+
+        unless master_file.save(validate: false)
           flash[:error] = "There was a problem storing the file"
         else
+          logger.debug("nnn master file saved successfully!")        
           media_object.save(validate: false)
           master_file.process
           @master_files << master_file

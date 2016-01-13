@@ -21,11 +21,9 @@ Unless required by applicable law or agreed to in writing, software distributed
       <%= render "ingest_steps" %>
       <%= render "remove_item" %>
 
-       <%# Begin part added by Ned %>
         <% if defined?(@profiles) %> 
             <%= render "export_merritt" %>
-	    <% end %>
-       <%# End part added by Ned %>
+	<% end %>
 
     </div>
     

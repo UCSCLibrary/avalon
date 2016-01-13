@@ -119,6 +119,7 @@ module Avalon
       end
 
       def process!
+        logger.debug "mer: Processing entry from entry.rb!"
         media_object.save
 
         @files.each do |file_spec|
@@ -155,7 +156,8 @@ module Avalon
         end
         
         if !@merritt_profile.nil?
-          @mediaobject.archive_in_merritt(merritt_profile);
+          logger.debug('mer: archiving in merritt:'+@merritt_profile)
+          media_object.archive_in_merritt(@merritt_profile);
         end
         
         media_object

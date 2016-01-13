@@ -36,7 +36,7 @@ class MerrittStatusJob < Struct.new(:pid,:batchID)
       when "COMPLETED"
         Delayed::Worker.logger.info("Item #{pid} completed! Updating permalink: #{job['doc']['jobState']['persistentURL']}")
         mediaObject = MediaObject.find(pid)
-        mediaObject.permalink = job['doc']['jobState']['persistentURL']
+        mediaObject.descMetadata.permalink = job['doc']['jobState']['persistentURL']
         mediaObject.save
 #        Delayed::Worker.logger.debug('ark:'+ark)
       when "FAILED"
