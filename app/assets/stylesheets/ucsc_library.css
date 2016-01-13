@@ -4,7 +4,15 @@ body {
 }
 
 ul.bookmarksTools li form select {
-    max-width:100px
+    max-width:100px;
+}
+
+div.blacklight-info-fedora-afmodel-mediaobject {
+    position:relative;
+}
+
+div.blacklight-info-fedora-afmodel-mediaobject img {
+    margin-bottom:10px;
 }
 
 #sidebar > form > select {
