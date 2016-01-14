@@ -59,9 +59,7 @@ module Avalon
       def initialize(file, package)
         @file = file
         @package = package
-        logger.debug "mer: loading"
         load!
-        logger.debug "mer: loaded"
       end
 
       def load!
@@ -76,11 +74,8 @@ module Avalon
           @field_names = header_row.collect { |field| 
             field.to_s.downcase.gsub(/\s/,'_').strip.to_sym 
           }
-          logger.debug "mer: creating entries"
           create_entries!
-          logger.debug "mer: entries created"
         rescue Exception => err
-          logger.debug "mer: error logged while loading manifest"
           error! "Invalid manifest file: #{err.message}"
         end
       end
@@ -90,7 +85,6 @@ module Avalon
       end
 
       def error! msg=nil
-        logger.debug "mer: an error is occurring"
         File.open("#{@file}.error",'a') do |f| 
           if msg.nil?
             entries.each do |entry|

@@ -14,7 +14,7 @@
  * ---  END LICENSE_HEADER BLOCK  ---
 */
 
-// Empty file for future js
+
 /* Override the search_context so it stops POSTing links which confuses
  * Rails and causes it to redirect to the wrong place. */
 $(document).ready(function() {
@@ -25,7 +25,7 @@ $(document).ready(function() {
       var longest = $(this).find('.facet-count span').sort(longer).first();
       var clone = longest.clone().css('visibility','hidden');
       $('body').append(clone);
-      $(this).find('.facet-count').first().width(clone.width());
+      $(this).find('.facet-count').first().width(clone.width()+2);
       clone.remove();
   });
 

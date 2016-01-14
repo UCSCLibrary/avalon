@@ -88,11 +88,6 @@ class MediaObject < ActiveFedora::Base
     end
   end
 
-
-#!!!---
-# BEGIN PART ADDED BY NED
-#!!!---
-
   def archive_in_merritt(profile,host_url=nil)
     require 'open-uri'
     require 'tmpdir'
@@ -108,17 +103,14 @@ class MediaObject < ActiveFedora::Base
     file.close
 
     command = "curl -u #{@merrittaccount['username']}:#{@merrittaccount['password']} -F file=@#{file.path} -F type=object-manifest -F responseForm=json -F profile=#{profile} -F title=\"#{self.title}\" -F creator=\"#{self.creator[0]}\" -F localIdentifier=\"#{self.pid}\" https://merritt.cdlib.org/object/ingest"
-    logger.debug("fffcommand:"+command);
     raw_response = `#{command}`
     begin
       response = JSON.parse(raw_response)
     rescue JSON::ParserError => e 
       return -1
     end
-    logger.debug("fffcommandresponse:"+response.to_s);
     batchState = response["bat:batchState"]
     batchID = batchState['bat:batchID']
-    logger.debug('starting status check job:'+self.pid+' batch: '+batchID)
     Delayed::Job.enqueue(MerrittStatusJob.new(self.pid,batchID))
   end
 

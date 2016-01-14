@@ -14,13 +14,11 @@
 
 class MerrittStatusJob < Struct.new(:pid,:batchID)
   def perform
-    Delayed::Worker.logger.info("checking status of item: #{pid}")
     self.merritt_check_status(pid,batchID)
   end
 
   def merritt_check_status(pid,batchID)
     batch_uri = "https://merritt.cdlib.org/istatus/bid/"+batchID+'/localfull/%22'+pid+'%22'
-    Delayed::Worker.logger.debug('batch_uri:'+batch_uri)
     uri = URI.parse(batch_uri);
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -31,19 +29,15 @@ class MerrittStatusJob < Struct.new(:pid,:batchID)
       return nil
     end
     response["rows"].each do |job|
-       Delayed::Worker.logger.debug('Job id:'+job["id"]+" status: "+job["value"])
       case job["value"]
       when "COMPLETED"
-        Delayed::Worker.logger.info("Item #{pid} completed! Updating permalink: #{job['doc']['jobState']['persistentURL']}")
         mediaObject = MediaObject.find(pid)
         mediaObject.descMetadata.permalink = job['doc']['jobState']['persistentURL']
         mediaObject.save
-#        Delayed::Worker.logger.debug('ark:'+ark)
       when "FAILED"
-        Delayed::Worker.logger.info("Item #{pid} FAILED!!!")
-      #do failure thing
+        Delayed::Worker.logger.warn("Item #{pid} FAILED to archive in Merritt!")
+        #TODO do failure thing
       else
-        Delayed::Worker.logger.info("Item #{pid} pending. Will check again in 10 minutes.")
         Delayed::Job.enqueue(MerrittStatusJob.new(pid,batchID),run_at: 10.minutes.from_now)
       end
     end
@@ -51,7 +45,7 @@ class MerrittStatusJob < Struct.new(:pid,:batchID)
 
 
   def error(job, exception)
-    #do something
+    #TODO do something (probably a mailer)
   end
 
 end

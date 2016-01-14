@@ -142,7 +142,7 @@ class MediaObjectsController < ApplicationController
     end
 
     if 'access-control' == @active_step 
-
+      @groups = @mediaobject.local_read_groups
       @users = @mediaobject.read_users
       @virtual_groups = @mediaobject.virtual_read_groups
       @visibility = @mediaobject.visibility
@@ -151,16 +151,9 @@ class MediaObjectsController < ApplicationController
       @addable_courses = Course.all.reject { |c| @virtual_groups.include? c.context_id }
     end
   
-    # !!!-----
-    # BEGIN PART ADDED BY NED
-    # !!!-----
-  
     if params[:merritt]
       @mediaobject.archive_in_merritt(params[:profile]);
     end
-    # !!!-----
-    # END PART ADDED BY NED
-    # !!!-----
 
 end
 

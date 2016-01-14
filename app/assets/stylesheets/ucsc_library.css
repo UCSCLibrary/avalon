@@ -3,6 +3,15 @@ body {
     padding:3%;
 }
 
+#featured_content .col-md-4 > a {
+    height: 230px;
+    overflow: hidden;
+}
+
+#featured_content .col-md-4 > h4 {
+    height: 2em;
+}
+
 ul.bookmarksTools li form select {
     max-width:100px;
 }

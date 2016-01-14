@@ -214,7 +214,7 @@ class MasterFile < ActiveFedora::Base
   end
 
   def succeeded?
-    status?('COMPLETED')
+    status?('COMPLETED') || status?('SUCCEEDED')
   end
 
   def stream_details(token,host=nil)
@@ -549,7 +549,6 @@ class MasterFile < ActiveFedora::Base
   def saveOriginal(file, original_name=nil)
     realpath = File.realpath(file.path)
     if original_name.present?
-      logger.debug('nnn original name is present')
       config_path = Avalon::Configuration.lookup('matterhorn.media_path')
       newpath = nil
       if config_path.present? and File.directory?(config_path)
@@ -561,13 +560,10 @@ class MasterFile < ActiveFedora::Base
       end
       self.file_location = newpath
     else 
-      logger.debug('nnn no original name is present')
       self.file_location = realpath
     end
     self.file_size = file.size.to_s
     file.close
-    logger.debug('nnn file location:'+ self.file_location)
-    logger.debug('nnn file size:'+ self.file_size)
   end
 
   def reloadTechnicalMetadata!

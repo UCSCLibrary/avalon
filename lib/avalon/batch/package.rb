@@ -27,9 +27,7 @@ module Avalon
 
       def initialize(manifest, collection)
         @dir = File.dirname(manifest)
-        logger.debug "mer: initializing manifest object"
         @manifest = Avalon::Batch::Manifest.new(manifest, self)
-        logger.debug "mer: initialized manifest object"
         @collection = collection
       end
       
@@ -51,13 +49,11 @@ module Avalon
       end
 
       def each_entry
-        logger.debug "mer: each entry started"
         @manifest.each_with_index do |entry, index|
           files = entry.files.dup
           files.each { |file| file[:file] = File.join(@dir,file[:file]) }
           yield(entry.fields, files, entry.opts, entry, index)
         end
-        logger.debug "mer: each entry done"
       end
 
       def processing?
@@ -69,22 +65,15 @@ module Avalon
       end
 
       def valid?
-        logger.debug "mer: checking manifest validity"
         @manifest.each { |entry| entry.valid? }
         @manifest.all? { |entry| entry.errors.count == 0 }
-        logger.debug "mer: checked manifest validity"
       end
 
       def process!
-        logger.debug "mer: processing manifest"
         @manifest.start!
-        logger.debug "mer: manifest started"
         begin
-          logger.debug "mer: collecting media objects"
           media_objects = @manifest.entries.collect { |entry| entry.process! }
-          logger.debug "mer: media objects collected. Committing"
           @manifest.commit!
-          logger.debug "mer: committed!"
         rescue Exception
           @manifest.error!
           raise
