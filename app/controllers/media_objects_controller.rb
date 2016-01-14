@@ -76,7 +76,6 @@ class MediaObjectsController < ApplicationController
     @files=[];
     @mediaobject = MediaObject.find(params[:id])
     host = YAML.load_file(Rails.root.join('config','avalon.yml'))[Rails.env]['domain']['host']
-    logger.debug('host from yaml:'+host)
     @mediaobject.parts_with_order.each { |file| 
       if(!file.file_location.include?('dropbox/'))
         flash.notice = "Merritt export currently only supports files uploaded to the FTP dropbox, not files uploaded through the browser"
@@ -105,7 +104,6 @@ class MediaObjectsController < ApplicationController
         response = http.get("/media_objects/#{params[:id]}/content/descMetadata")
       }
       file_size = response.body.size
-      logger.debug('newresponse3:'+response.inspect)
       @files << {
         hashAlg: hashAlg,
         hash: hash,

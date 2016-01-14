@@ -180,7 +180,6 @@ class MasterFilesController < ApplicationController
         unless master_file.save
           flash[:error] = "There was a problem storing the file"
         else
-          logger.debug("nnn master file saved successfully!")        
           media_object.save(validate: false)
           master_file.process
           @master_files << master_file

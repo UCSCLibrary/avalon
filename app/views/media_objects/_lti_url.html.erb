@@ -5,7 +5,7 @@
       <form role="form">
         <div class="form-group">
           <label for="ltilink-object">Item</label>
-          <input type="text" class="col-md-5 form-control" id="ltilink-object" value="<% = user_omniauth_callback_url(action: 'lti', target_id: @mediaobject) %>" onClick="this.select();" readonly="readonly">
+          <input type="text" class="col-md-5 form-control" id="ltilink-object" value="<%= user_omniauth_callback_url(action: 'lti', target_id: @mediaobject) %>" onClick="this.select();" readonly="readonly">
         </div>
         <div class="form-group">
           <label for="ltilink-section">Section</label>

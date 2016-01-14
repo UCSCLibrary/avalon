@@ -77,6 +77,8 @@ config/database.yml
 config/fedora.yml
 config/solr.yml
 
+Gemfile.lock
+
 public/media_objects
 public/streams
 public/**/*.m3u8

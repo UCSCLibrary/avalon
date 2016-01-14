@@ -104,7 +104,7 @@
   end
 
   group :development do
-#    gem 'xray-rails'
+    gem 'xray-rails'
     gem 'better_errors',   platforms: [:mri_20, :mri_21]
     gem 'binding_of_caller',   platforms: [:mri_20, :mri_21]
     gem 'license_header'

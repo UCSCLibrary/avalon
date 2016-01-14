@@ -114,8 +114,6 @@ class MediaObject < ActiveFedora::Base
     Delayed::Job.enqueue(MerrittStatusJob.new(self.pid,batchID))
   end
 
-#!END PART ADDED BY NED
-
   # this method returns a hash: class attribute -> metadata attribute
   # this is useful for decoupling the metdata from the view
   def klass_attribute_to_metadata_attribute_map
