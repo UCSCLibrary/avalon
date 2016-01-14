@@ -88,6 +88,32 @@ class MediaObject < ActiveFedora::Base
     end
   end
 
+  def archive_in_merritt(profile,host_url=nil)
+    require 'open-uri'
+    require 'tmpdir'
+    require 'uri'
+
+    @merrittaccount = YAML.load_file(Rails.root.join('config','merritt.yml'))[Rails.env]
+    host_url = YAML.load_file(Rails.root.join('config','avalon.yml'))[Rails.env]['domain']['host']
+
+    file = File.open('/tmp/'+Dir::Tmpname.make_tmpname(['merritt-object-manifest-', '.checkm'], nil),'w')
+
+    fhandle = open('http://localhost/media_objects/'+self.pid+"/manifest")
+    file << fhandle.read
+    file.close
+
+    command = "curl -u #{@merrittaccount['username']}:#{@merrittaccount['password']} -F file=@#{file.path} -F type=object-manifest -F responseForm=json -F profile=#{profile} -F title=\"#{self.title}\" -F creator=\"#{self.creator[0]}\" -F localIdentifier=\"#{self.pid}\" https://merritt.cdlib.org/object/ingest"
+    raw_response = `#{command}`
+    begin
+      response = JSON.parse(raw_response)
+    rescue JSON::ParserError => e 
+      return -1
+    end
+    batchState = response["bat:batchState"]
+    batchID = batchState['bat:batchID']
+    Delayed::Job.enqueue(MerrittStatusJob.new(self.pid,batchID))
+  end
+
   # this method returns a hash: class attribute -> metadata attribute
   # this is useful for decoupling the metdata from the view
   def klass_attribute_to_metadata_attribute_map
@@ -530,8 +556,7 @@ class MediaObject < ActiveFedora::Base
         ensure_permalink!
         self.parts.each do |master_file| 
           begin
-            master_file.ensure_permalink!
-            master_file.save( validate: false )
+            master_file.save( validate: false ) if master_file.ensure_permalink!
           rescue
           	# no-op
           	# Save is called (uncharacteristically) during a destroy.

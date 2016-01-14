@@ -21,7 +21,6 @@ Unless required by applicable law or agreed to in writing, software distributed
             <p>No media is associated with this item</p>
           </div>
         <% elsif @masterFiles.any? { |mf| not mf.succeeded? } %>
-	
           <% content_for :page_scripts do %>
             <%= javascript_include_tag 'avalon_progress' %>
           <% end %>

@@ -20,14 +20,15 @@ module Avalon
     class Entry
     	extend ActiveModel::Translation
 
-    	attr_reader :fields, :files, :opts, :row, :errors, :manifest, :collection
+    	attr_reader :fields, :files, :opts, :row, :errors, :manifest, :collection, :merritt_profile
 
-    	def initialize(fields, files, opts, row, manifest)
+    	def initialize(fields, files, opts, row, manifest, merritt_profile=nil)
 	  @fields = fields
 	  @files  = files
 	  @opts   = opts
 	  @row    = row
 	  @manifest = manifest
+          @merritt_profile = merritt_profile
 	  @errors = ActiveModel::Errors.new(self)
 	  @files.each { |file| file[:file] = File.join(@manifest.package.dir, file[:file]) }
         end
@@ -152,7 +153,11 @@ module Avalon
         unless media_object.save
           logger.error "Problem saving MediaObject: #{media_object}"
         end
-
+        
+        if !@merritt_profile.nil?
+          media_object.archive_in_merritt(@merritt_profile);
+        end
+        
         media_object
       end
 

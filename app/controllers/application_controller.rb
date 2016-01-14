@@ -42,7 +42,7 @@ class ApplicationController < ActionController::Base
   end
 
   def current_ability
-    @current_ability ||= Ability.new(current_user, user_session)
+    @current_ability ||= Ability.new(current_user, user_session,request.remote_ip)
   end
 
   def store_location

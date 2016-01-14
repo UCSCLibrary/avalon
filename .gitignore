@@ -68,8 +68,16 @@ config/authentication.yml
 config/avalon.yml
 config/matterhorn.yml
 config/role_map_development.yml
+config/role_map_production.yml
+config/role_map.yml
 config/initializers/rubyhorn.rb
 config/secrets.yml
+config/merritt.yml
+config/database.yml
+config/fedora.yml
+config/solr.yml
+
+Gemfile.lock
 
 public/media_objects
 public/streams

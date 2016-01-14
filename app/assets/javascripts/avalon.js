@@ -14,12 +14,7 @@
  * ---  END LICENSE_HEADER BLOCK  ---
 */
 
-/*$(document).ready(function() {
-	$("input[name='utf8']").remove();
-	console.log('it is done.');
-	});*/
 
-// Empty file for future js
 /* Override the search_context so it stops POSTing links which confuses
  * Rails and causes it to redirect to the wrong place. */
 $(document).ready(function() {

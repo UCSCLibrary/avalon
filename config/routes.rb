@@ -10,6 +10,7 @@ Avalon::Application.routes.draw do
       post '/bookmarks/update_access_control'
       post '/bookmarks/publish', as: :publish_bookmarks
       post '/bookmarks/unpublish', as: :unpublish_bookmarks
+      post '/bookmarks/archive', as: :archive_bookmarks
 
   post '/media_objects/set_session_quality'
 
@@ -31,7 +32,7 @@ Avalon::Application.routes.draw do
   match "/oembed", to: 'master_files#oembed', via: [:get]
 
   match "object/:id", to: 'object#show', via: [:get], :as => :object
-  resources :media_objects, except: [:create] do
+  resources :media_objects, except: [:create] do    
     member do
       put :update_status
       get :progress, :action => :show_progress
@@ -40,6 +41,8 @@ Avalon::Application.routes.draw do
       get 'section/:content', :action => :show, :as => :pid_section
       get 'tree', :action => :tree, :as => :tree
       get :confirm_remove
+      get 'archive',:action => :archive
+      get 'manifest',:action => :manifest
     end
     collection do
       get :confirm_remove

@@ -175,8 +175,8 @@ class MasterFilesController < ApplicationController
         master_file.save( validate: false )
         master_file.mediaobject = media_object
         master_file.setContent(File.open(file_path, 'rb'))
-        master_file.set_workflow(params[:workflow])
-        
+        master_file.set_workflow(params[:workflow])        
+
         unless master_file.save
           flash[:error] = "There was a problem storing the file"
         else

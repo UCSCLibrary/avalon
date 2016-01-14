@@ -61,6 +61,67 @@ class MediaObjectsController < ApplicationController
     redirect_to edit_media_object_path(@mediaobject)
   end
 
+  def archive
+    @mediaobject = MediaObject.find(params[:id])
+    begin
+      @mediaobject.archive_in_merritt(params[:profile]);
+      flash.notice = 'This item has been exported to Merritt.'
+    rescue
+      flash.notice = 'There was an error exporting to Merritt. Please try again later or contact your system administrator.'
+    end
+    redirect_to media_object_path(@mediaobject)
+  end
+
+  def manifest
+    @files=[];
+    @mediaobject = MediaObject.find(params[:id])
+    host = YAML.load_file(Rails.root.join('config','avalon.yml'))[Rails.env]['domain']['host']
+    @mediaobject.parts_with_order.each { |file| 
+      if(!file.file_location.include?('dropbox/'))
+        flash.notice = "Merritt export currently only supports files uploaded to the FTP dropbox, not files uploaded through the browser"
+        redirect_to media_object_path(@mediaobject)
+        return
+      end
+
+#      if file.file_size.to_i > 100000000 then
+      hash = ""
+      hashAlg = ""
+#      else 
+#        hash = Digest::MD5.file file.file_location 
+#        hashAlg = 'md5'
+#      end 
+
+      @files << {
+        hashAlg: hashAlg,
+        hash: hash,
+        size: file.file_size,
+        filename: file.file_location.lines('/').to_a[-1],
+        url: "#{host}/direct/"+file.file_location.lines('dropbox/').to_a[1].gsub(" ","%20")
+      }
+      metaUrl = "#{host}/media_objects/#{params[:id]}/content/descMetadata"
+      response = nil
+      Net::HTTP.start(host, 80) {|http|
+        response = http.get("/media_objects/#{params[:id]}/content/descMetadata")
+      }
+      file_size = response.body.size
+      @files << {
+        hashAlg: hashAlg,
+        hash: hash,
+        size: file_size,
+        filename: "DescMetadata.xml",
+        url: metaUrl
+      }
+    }
+    require 'cgi'
+    response.headers["Content-Type"] = "text/plain"
+    render :layout =>false
+  end
+  
+  def edit
+    @profiles = YAML.load_file(Rails.root.join('config','merritt.yml'))[Rails.env]['profiles']
+    super
+  end
+
   def custom_edit
     authorize! :update, @mediaobject
     if ['preview', 'structure', 'file-upload'].include? @active_step
@@ -87,7 +148,13 @@ class MediaObjectsController < ApplicationController
       @addable_groups = Admin::Group.non_system_groups.reject { |g| @groups.include? g.name }
       @addable_courses = Course.all.reject { |c| @virtual_groups.include? c.context_id }
     end
-  end
+  
+    if params[:merritt]
+      @mediaobject.archive_in_merritt(params[:profile]);
+    end
+
+end
+
 
   def custom_update
     authorize! :update, @mediaobject

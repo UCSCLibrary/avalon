@@ -12,10 +12,16 @@
 #   specific language governing permissions and limitations under the License.
 # ---  END LICENSE_HEADER BLOCK  ---
 
+
 class Ability
   include CanCan::Ability
   include Hydra::Ability
   include Hydra::PolicyAwareAbility
+
+  def initialize(current_user,user_session={},client_ip=nil)
+    @client_ip = client_ip
+    super(current_user,user_session)
+  end
 
   def user_groups
     return @user_groups if @user_groups
@@ -28,6 +34,16 @@ class Ability
   end
 
   def create_permissions(user=nil, session=nil)
+
+    net1 = IPAddr.new("128.48.120.0/24")
+    net2 = IPAddr.new("128.114.104.0/24")
+    net3 = IPAddr.new("128.114.229.0/24")
+    net5 = IPAddr.new("128.114.228.0/24")
+    net4 = IPAddr.new("127.0.0.1/24")
+    if net1===@client_ip || net2===@client_ip || net3===@client_ip || net4===@client_ip || net5===@client_ip
+      can :inspect, MediaObject
+    end
+
     if full_login?
       if @user_groups.include? "administrator"
         can :manage, MediaObject

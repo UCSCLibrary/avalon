@@ -133,6 +133,7 @@ module Avalon
       end
 
       def create_entries!
+        @merritt_profile = ""
         f = @spreadsheet.first_row + 2
         l = @spreadsheet.last_row
         f.upto(l) do |index|
@@ -152,6 +153,11 @@ module Avalon
               if FILE_FIELDS.include?(f)
                 content << {} if f == :file
                 content.last[f] = f == :skip_transcoding ? true?(values[i]) : values[i]
+              elsif "merritt_profile"==f.to_s
+                @merritt_profile = values[i]
+                if !@merritt_profile.nil? && @merritt_profile.empty?
+                  @merritt_profile = nil
+                end
               else
                 fields[f] << values[i] 
               end
@@ -167,7 +173,7 @@ module Avalon
             end
           }
 
-          entries << Entry.new(fields.select { |f| !FILE_FIELDS.include?(f) }, content, opts, index, self)
+          entries << Entry.new(fields.select { |f| !FILE_FIELDS.include?(f) }, content, opts, index, self, @merritt_profile)
         end
       end
 

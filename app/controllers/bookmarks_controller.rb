@@ -32,6 +32,8 @@ class BookmarksController < CatalogController
 
   self.add_show_tools_partial( :delete, callback: :delete_action, if: Proc.new { |context, config, options| context.controller.user_can? :delete } )
 
+  self.add_show_tools_partial( :archive, callback: :archive_action, modal:false, partial: 'archive_merritt', if: Proc.new { |context, config, options| context.controller.user_can? :publish } )
+
   before_filter :verify_permissions, only: :index
 
   #HACK next two methods are a hack for problems in the puppet VM tomcat/solr
@@ -74,6 +76,8 @@ class BookmarksController < CatalogController
     bookmark_ids = @bookmarks.collect { |b| b.document_id.to_s }
   
     @response, @document_list = get_solr_response_for_document_ids(bookmark_ids, defType: 'edismax')
+
+    @profiles = YAML.load_file(Rails.root.join('config','merritt.yml'))[Rails.env]['profiles']
 
     respond_to do |format|
       format.html { }
@@ -174,4 +178,21 @@ class BookmarksController < CatalogController
       MediaObject.move_bulk success_ids, params
     end
   end
+  
+  def archive_action documents
+    errors = []
+    success_ids = []
+    Array(documents.map(&:id)).each do |id|
+      media_object = MediaObject.find(id)
+      if can? :update, media_object
+        media_object.archive_in_merritt(params[:profile])
+        success_ids << id
+      else
+        errors += ["#{media_object.title} (#{id}) #{t('blacklight.messages.permission_denied')}."]
+      end
+    end
+    flash[:success] = "Successfully archived #{success_ids.count} items into Merritt"  if success_ids.count > 0
+    flash[:alert] = "Failed to archive #{errors.count} items into Merritt" if errors.count > 0
+  end
+
 end

@@ -12,6 +12,22 @@ body {
     height: 2em;
 }
 
+ul.bookmarksTools li form select {
+    max-width:100px;
+}
+
+div.blacklight-info-fedora-afmodel-mediaobject {
+    position:relative;
+}
+
+div.blacklight-info-fedora-afmodel-mediaobject img {
+    margin-bottom:10px;
+}
+
+#sidebar > form > select {
+    max-width:100%;
+}
+
 .col-sm-3 {
     bottom: 0;
     left: 0;
